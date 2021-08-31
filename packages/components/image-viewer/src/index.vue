@@ -71,7 +71,7 @@ import { EVENT_CODE } from '@element-plus/utils/aria'
 import { on, off } from '@element-plus/utils/dom'
 import { rafThrottle, isFirefox } from '@element-plus/utils/util'
 
-import type { PropType, CSSProperties } from 'vue'
+import type { PropType } from 'vue'
 
 const Mode = {
   CONTAIN: {
@@ -160,7 +160,7 @@ export default defineComponent({
         transition: enableTransition ? 'transform .3s' : '',
         marginLeft: `${offsetX}px`,
         marginTop: `${offsetY}px`,
-      } as CSSProperties
+      } as CSSStyleDeclaration
       if (mode.value.name === Mode.CONTAIN.name) {
         style.maxWidth = style.maxHeight = '100%'
       }
@@ -242,6 +242,13 @@ export default defineComponent({
       const { offsetX, offsetY } = transform.value
       const startX = e.pageX
       const startY = e.pageY
+
+      const div = document.getElementsByClassName('el-image-viewer__wrapper')
+      const divLeft = div[0].clientLeft
+      const divRight = div[0].clientLeft + div[0].clientWidth
+      const divTop = div[0].clientTop
+      const divBottom = div[0].clientTop + div[0].clientHeight
+
       _dragHandler = rafThrottle(ev => {
         transform.value = {
           ...transform.value,
@@ -250,7 +257,12 @@ export default defineComponent({
         }
       })
       on(document, 'mousemove', _dragHandler)
-      on(document, 'mouseup', () => {
+      on(document, 'mouseup', (e: any) => {
+        const mouseX = e.pageX
+        const mouseY = e.pageY
+        if (mouseX < divLeft || mouseX > divRight || mouseY < divTop || mouseY > divBottom){
+          reset()
+        }
         off(document, 'mousemove', _dragHandler)
       })
 
