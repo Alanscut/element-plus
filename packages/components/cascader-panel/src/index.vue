@@ -62,6 +62,7 @@ import type {
 } from './node'
 
 import { ElCascaderPanelContext } from './types'
+import _ from 'lodash'
 
 export default defineComponent({
   name: 'ElCascaderPanel',
@@ -128,8 +129,8 @@ export default defineComponent({
         }
       }
 
-      oldConfig = configTemp
-      oldOptions = options
+      oldConfig = _.cloneDeep(configTemp)
+      oldOptions = _.cloneDeep(options)
     }
 
     const lazyLoad: ElCascaderPanelContext['lazyLoad'] = (node, cb) => {
