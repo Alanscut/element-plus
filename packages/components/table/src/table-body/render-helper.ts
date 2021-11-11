@@ -32,6 +32,7 @@ function useRender<T>(props: Partial<TableBodyProps<T>>) {
     getCellClass,
     getSpan,
     getColspanRealWidth,
+    isColumnHidden,
   } = useStyles(props)
   const firstDefaultColumnIndex = computed(() => {
     return props.store.states.columns.value.findIndex(
@@ -125,8 +126,36 @@ function useRender<T>(props: Partial<TableBodyProps<T>>) {
       })
     )
   }
+  const isHavePopover = (cell) => {
+    const queue = []
+    queue.push(cell)
+    let child = null
+    while (queue.length > 0) {
+      child = queue[0]
+      queue.shift()
+      if (child?.type?.name === 'ElPopover') {
+        return true
+      }
+      if (child instanceof Array) {
+        child.forEach((item) => {
+          queue.push(item)
+        })
+      } else if (child?.children?.length > 0) {
+        child.children.forEach((item) => {
+          queue.push(item)
+        })
+      }
+    }
+    return false
+  }
+
   const cellChildren = (cellIndex, column, data) => {
-    return column.renderCell(data)
+    const renderCell = column.renderCell(data)
+    if (isColumnHidden(cellIndex) && isHavePopover(renderCell)) {
+      return null
+    } else {
+      return renderCell
+    }
   }
   const wrappedRowRender = (row: T, $index: number) => {
     const store = props.store
