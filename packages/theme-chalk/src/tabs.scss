@@ -110,13 +110,36 @@
     font-weight: 500;
     color: var(--el-text-color-primary);
     position: relative;
+    transition: color var(--el-transition-duration)
+        cubic-bezier(0.645, 0.045, 0.355, 1),
+      padding var(--el-transition-duration) cubic-bezier(0.645, 0.045, 0.355, 1);
 
     &:focus,
     &:focus:active {
       outline: none;
     }
+    &.is-closable {
+      &:hover {
+        padding-left: 13px;
+        padding-right: 13px;
+        & .is-icon-close {
+          width: 14px;
+        }
+      }
+    }
+    &.is-active {
+      &.is-closable {
+        padding-left: 20px;
+        padding-right: 20px;
+        .is-icon-close {
+          width: 14px;
+        }
+      }
+    }
 
     & .is-icon-close {
+      width: 0;
+      overflow: hidden;
       border-radius: 50%;
       text-align: center;
       transition: all var(--el-transition-duration)

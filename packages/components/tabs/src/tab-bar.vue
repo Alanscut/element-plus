@@ -82,9 +82,10 @@ export default defineComponent({
 
     watch(
       () => props.tabs,
-      async () => {
-        await nextTick()
-        update()
+      () => {
+        setTimeout(() => {
+          update()
+        }, 200)
       },
       { immediate: true }
     )
