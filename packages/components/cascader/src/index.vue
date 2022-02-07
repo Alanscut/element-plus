@@ -1,28 +1,37 @@
 <template>
-  <el-popper
-    ref="popper"
+  <el-tooltip
+    ref="tooltipRef"
     v-model:visible="popperVisible"
-    manual-mode
-    :append-to-body="popperAppendToBody"
-    placement="bottom-start"
+    :teleported="compatTeleported"
     :popper-class="`el-cascader__dropdown ${popperClass}`"
     :popper-options="popperOptions"
-    :fallback-placements="['bottom-start', 'top-start', 'right', 'left']"
+    :fallback-placements="[
+      'bottom-start',
+      'bottom',
+      'top-start',
+      'top',
+      'right',
+      'left',
+    ]"
     :stop-popper-mouse-event="false"
-    transition="el-zoom-in-top"
     :gpu-acceleration="false"
-    :effect="Effect.LIGHT"
+    placement="bottom-start"
+    transition="el-zoom-in-top"
+    effect="light"
     pure
-    @after-leave="hideSuggestionPanel"
+    persistent
+    @hide="hideSuggestionPanel"
   >
-    <template #trigger>
+    <template #default>
       <div
         v-clickoutside:[popperPaneRef]="() => togglePopperVisible(false)"
         :class="[
           'el-cascader',
           realSize && `el-cascader--${realSize}`,
           { 'is-disabled': isDisabled },
+          $attrs.class,
         ]"
+        :style="$attrs.style"
         @click="() => togglePopperVisible(readonly ? undefined : true)"
         @keydown="handleKeyDown"
         @mouseenter="inputHover = true"
@@ -30,7 +39,7 @@
       >
         <el-input
           ref="input"
-          v-model.trim="inputValue"
+          v-model="inputValue"
           :placeholder="inputPlaceholder"
           :readonly="readonly"
           :disabled="isDisabled"
@@ -83,7 +92,7 @@
           </el-tag>
           <input
             v-if="filterable && !isDisabled"
-            v-model.trim="searchInputValue"
+            v-model="searchInputValue"
             type="text"
             class="el-cascader__search-input"
             :placeholder="presentText ? '' : inputPlaceholder"
@@ -98,7 +107,7 @@
       </div>
     </template>
 
-    <template #default>
+    <template #content>
       <el-cascader-panel
         v-show="!filtering"
         ref="panel"
@@ -108,7 +117,7 @@
         :border="false"
         :render-label="$slots.default"
         @expand-change="handleExpandChange"
-        @close="togglePopperVisible(false)"
+        @close="$nextTick(() => togglePopperVisible(false))"
       />
       <el-scrollbar
         v-if="filterable"
@@ -141,7 +150,7 @@
         </slot>
       </el-scrollbar>
     </template>
-  </el-popper>
+  </el-tooltip>
 </template>
 
 <script lang="ts">
@@ -163,7 +172,10 @@ import ElCascaderPanel, {
   CommonProps,
 } from '@element-plus/components/cascader-panel'
 import ElInput from '@element-plus/components/input'
-import ElPopper, { Effect } from '@element-plus/components/popper'
+import ElTooltip, {
+  useTooltipContentProps,
+} from '@element-plus/components/tooltip'
+import { useDeprecateAppendToBody } from '@element-plus/components/popper'
 import ElScrollbar from '@element-plus/components/scrollbar'
 import ElTag from '@element-plus/components/tag'
 import ElIcon from '@element-plus/components/icon'
@@ -193,7 +205,7 @@ import type {
 import type { ComponentSize } from '@element-plus/utils/types'
 
 type cascaderPanelType = InstanceType<typeof ElCascaderPanel>
-type popperType = InstanceType<typeof ElPopper>
+type tooltipType = InstanceType<typeof ElTooltip>
 type inputType = InstanceType<typeof ElInput>
 type suggestionPanelType = InstanceType<typeof ElScrollbar>
 
@@ -213,21 +225,21 @@ const popperOptions: Partial<Options> = {
       phase: 'main',
       fn: ({ state }) => {
         const { modifiersData, placement } = state as any
-        if (['right', 'left'].includes(placement)) return
+        if (['right', 'left', 'bottom', 'top'].includes(placement)) return
         modifiersData.arrow.x = 35
       },
       requires: ['arrow'],
     },
   ],
 }
-
+const COMPONENT_NAME = 'ElCascader'
 export default defineComponent({
-  name: 'ElCascader',
+  name: COMPONENT_NAME,
 
   components: {
     ElCascaderPanel,
     ElInput,
-    ElPopper,
+    ElTooltip,
     ElScrollbar,
     ElTag,
     ElIcon,
@@ -282,8 +294,9 @@ export default defineComponent({
     },
     popperAppendToBody: {
       type: Boolean,
-      default: true,
+      default: undefined,
     },
+    teleported: useTooltipContentProps.teleported,
   },
 
   emits: [
@@ -300,11 +313,15 @@ export default defineComponent({
     let inputInitialHeight = 0
     let pressDeleteCount = 0
 
+    const { compatTeleported } = useDeprecateAppendToBody(
+      COMPONENT_NAME,
+      'popperAppendToBody'
+    )
     const { t } = useLocale()
     const elForm = inject(elFormKey, {} as ElFormContext)
     const elFormItem = inject(elFormItemKey, {} as ElFormItemContext)
 
-    const popper: Ref<popperType | null> = ref(null)
+    const tooltipRef: Ref<tooltipType | null> = ref(null)
     const input: Ref<inputType | null> = ref(null)
     const tagWrapper = ref(null)
     const panel: Ref<cascaderPanelType | null> = ref(null)
@@ -324,7 +341,7 @@ export default defineComponent({
     )
     const realSize = useSize()
     const tagSize = computed(() =>
-      ['small'].includes(realSize.value) ? 'small' : ''
+      ['small'].includes(realSize.value) ? 'small' : 'default'
     )
     const multiple = computed(() => !!props.props.multiple)
     const readonly = computed(() => !props.filterable || multiple.value)
@@ -367,7 +384,7 @@ export default defineComponent({
     })
 
     const popperPaneRef = computed(() => {
-      return popper.value?.popperRef
+      return tooltipRef.value?.popperRef?.contentRef
     })
 
     const togglePopperVisible = (visible?: boolean) => {
@@ -393,7 +410,9 @@ export default defineComponent({
     }
 
     const updatePopperPosition = () => {
-      nextTick(popper.value?.update)
+      nextTick(() => {
+        tooltipRef.value?.updatePopper()
+      })
     }
 
     const hideSuggestionPanel = () => {
@@ -657,9 +676,8 @@ export default defineComponent({
     })
 
     return {
-      Effect,
       popperOptions,
-      popper,
+      tooltipRef,
       popperPaneRef,
       input,
       tagWrapper,
@@ -682,6 +700,9 @@ export default defineComponent({
       multiple,
       readonly,
       clearBtnVisible,
+      // deprecation in ver 2.1.0
+      compatTeleported,
+
       t,
       togglePopperVisible,
       hideSuggestionPanel,

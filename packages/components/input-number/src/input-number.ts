@@ -20,7 +20,6 @@ export const inputNumberProps = buildProps({
   },
   modelValue: {
     type: Number,
-    required: true,
   },
   disabled: {
     type: Boolean,
@@ -53,5 +52,6 @@ export const inputNumberEmits = {
   blur: (e: FocusEvent) => e instanceof FocusEvent,
   focus: (e: FocusEvent) => e instanceof FocusEvent,
   input: (val: number) => isNumber(val),
-  'update:modelValue': (val: number) => isNumber(val),
+  'update:modelValue': (val: number | undefined) =>
+    isNumber(val) || val === undefined,
 }

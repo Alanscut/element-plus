@@ -1,4 +1,4 @@
-import { ref, h, nextTick } from 'vue'
+import { ref, h, nextTick, defineComponent } from 'vue'
 import { mount } from '@vue/test-utils'
 import { Loading, Search } from '@element-plus/icons-vue'
 import Button from '../src/button.vue'
@@ -35,9 +35,9 @@ describe('Button.vue', () => {
   })
   it('size', () => {
     const wrapper = mount(Button, {
-      props: { size: 'default' },
+      props: { size: 'large' },
     })
-    expect(wrapper.classes()).toContain('el-button--default')
+    expect(wrapper.classes()).toContain('el-button--large')
   })
   it('plain', () => {
     const wrapper = mount(Button, {
@@ -106,6 +106,42 @@ describe('Button.vue', () => {
     await wrapper.trigger('click')
     expect(wrapper.emitted('click')).toBeUndefined()
   })
+
+  it('loading icon', () => {
+    const wrapper = mount(Button, {
+      props: {
+        loadingIcon: Search,
+        loading: true,
+      },
+    })
+    expect(wrapper.findComponent(Search).exists()).toBeTruthy()
+  })
+
+  it('loading slot', () => {
+    const App = defineComponent({
+      setup() {
+        return () =>
+          h(
+            Button,
+            {
+              loading: true,
+            },
+            {
+              default: 'Loading',
+              loading: h(
+                'span',
+                {
+                  class: 'custom-loading',
+                },
+                ['111']
+              ),
+            }
+          )
+      },
+    })
+    const wrapper = mount(App)
+    expect(wrapper.find('.custom-loading').exists()).toBeTruthy()
+  })
 })
 describe('Button Group', () => {
   it('create', () => {
@@ -140,11 +176,11 @@ describe('Button Group', () => {
       wrapper.findAll('.el-button-group button.el-button--small').length
     ).toBe(2)
 
-    size.value = 'default'
+    size.value = 'large'
     await nextTick()
 
     expect(
-      wrapper.findAll('.el-button-group button.el-button--default').length
+      wrapper.findAll('.el-button-group button.el-button--large').length
     ).toBe(2)
   })
 

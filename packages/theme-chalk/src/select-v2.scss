@@ -7,8 +7,9 @@
 @use './select-dropdown-v2.scss';
 @use './option-item.scss';
 @use './option-group.scss';
+@use './select/common.scss' as *;
 
-$input-inline-start: 15px !default;
+$input-inline-start: map.get($input-padding-horizontal, 'default') !default;
 
 @include b(select-v2) {
   @include set-component-css-var('select', $select);
@@ -17,14 +18,17 @@ $input-inline-start: 15px !default;
 @include b(select-v2) {
   display: inline-block;
   position: relative;
+  vertical-align: middle;
   font-size: map.get($input-font-size, 'default');
   $selector: &;
   @include e(wrapper) {
-    height: map.get($input-height, 'default');
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
 
     box-sizing: border-box;
     cursor: pointer;
-    padding: 5px 30px 5px 0px;
+    padding: 1px 30px 1px 0;
     border: 1px solid var(--el-border-color-base);
     border-radius: var(--el-border-radius-base);
     transition: border-color var(--el-transition-duration-fast)
@@ -84,7 +88,6 @@ $input-inline-start: 15px !default;
     #{$selector}__input-wrapper input {
       line-height: map.get($input-height, 'default') - 8px;
       height: map.get($input-height, 'default') - 8px;
-
       min-width: 4px;
       width: 100%;
 
@@ -95,18 +98,13 @@ $input-inline-start: 15px !default;
       background: 0 0;
       border: none;
 
-      margin: 0;
+      margin: 2px 0;
       outline: none;
       padding: 0;
     }
   }
 
-  .#{$namespace}-select-v2__tags-text {
-    text-overflow: ellipsis;
-    display: inline-block;
-    overflow-x: hidden;
-    vertical-align: bottom;
-  }
+  @include select-common(select-v2);
 
   @include e(empty) {
     padding: 10px 0;
@@ -127,9 +125,8 @@ $input-inline-start: 15px !default;
   @each $size in (large, small) {
     @include m($size) {
       @include e(wrapper) {
-        &,
-        #{$selector}__input-wrapper {
-          height: map.get($input-height, $size);
+        #{$selector}__combobox-input {
+          height: map.get($input-height, $size) - 8px;
         }
       }
       @include e(caret) {
@@ -198,11 +195,13 @@ $input-inline-start: 15px !default;
   }
 
   @include e(suffix) {
+    display: inline-flex;
     position: absolute;
-    right: 5px;
+    right: 12px;
     height: 40px;
     top: 50%;
     transform: translateY(-50%);
+    color: var(--el-input-icon-color, map.get($input, 'icon-color'));
   }
 
   @include e(caret) {
@@ -304,6 +303,13 @@ $input-inline-start: 15px !default;
         display: block;
         transform: translate(0, 0.5px);
       }
+    }
+  }
+
+  &.#{$namespace}-select-v2--small {
+    .#{$namespace}-select-v2__selection .#{$namespace}-tag {
+      margin: 1px 0 1px 6px;
+      height: 18px;
     }
   }
 }

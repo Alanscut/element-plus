@@ -1,5 +1,5 @@
 <template>
-  <span class="el-pagination__jump">
+  <span class="el-pagination__jump" :disabled="disabled">
     {{ t('el.pagination.goto') }}
     <el-input
       size="small"
@@ -39,6 +39,7 @@ export default defineComponent({
     }
 
     function handleChange(val: number | string) {
+      val = Math.trunc(+val)
       changeEvent?.(+val)
       userInput.value = undefined
     }

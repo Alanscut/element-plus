@@ -1,25 +1,19 @@
 <template>
-  <div class="el-descriptions">
+  <div :class="descriptionKls">
     <div
       v-if="title || extra || $slots.title || $slots.extra"
-      class="el-descriptions__header"
+      :class="ns.e('header')"
     >
-      <div class="el-descriptions__title">
+      <div :class="ns.e('title')">
         <slot name="title">{{ title }}</slot>
       </div>
-      <div class="el-descriptions__extra">
+      <div :class="ns.e('extra')">
         <slot name="extra">{{ extra }}</slot>
       </div>
     </div>
 
-    <div class="el-descriptions__body">
-      <table
-        :class="[
-          'el-descriptions__table',
-          { 'is-bordered': border },
-          descriptionsSize ? `el-descriptions--${descriptionsSize}` : '',
-        ]"
-      >
+    <div :class="ns.e('body')">
+      <table :class="[ns.e('table'), ns.is('bordered', border)]">
         <tbody>
           <template v-for="(row, index) in getRows()" :key="index">
             <el-descriptions-row :row="row" />
@@ -31,9 +25,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, provide } from 'vue'
+import { computed, defineComponent, provide } from 'vue'
 import { isValidComponentSize } from '@element-plus/utils/validators'
-import { useSize } from '@element-plus/hooks'
+import { useSize, useNamespace } from '@element-plus/hooks'
 import DescriptionsRow from './descriptions-row.vue'
 import { elDescriptionsKey } from './token'
 
@@ -75,6 +69,12 @@ export default defineComponent({
     provide(elDescriptionsKey, props)
 
     const descriptionsSize = useSize()
+    const ns = useNamespace('descriptions')
+
+    const descriptionKls = computed(() => [
+      ns.b(),
+      ns.is(ns.m(descriptionsSize.value), !!descriptionsSize.value),
+    ])
 
     const flattedChildren = (children) => {
       const temp = Array.isArray(children) ? children : [children]
@@ -142,8 +142,9 @@ export default defineComponent({
     }
 
     return {
-      descriptionsSize,
+      descriptionKls,
       getRows,
+      ns,
     }
   },
 })

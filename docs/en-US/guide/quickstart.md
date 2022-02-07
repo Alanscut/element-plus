@@ -46,7 +46,7 @@ You need to use an additional plugin to import components you used.
 
 #### Auto import <el-tag type="primary" style="vertical-align: middle;" effect="dark" size="small">Recommend</el-tag>
 
-First you need install `unplugin-vue-components` and `unplugin-auto-import`.
+First you need to install `unplugin-vue-components` and `unplugin-auto-import`.
 
 ```shell
 npm install -D unplugin-vue-components unplugin-auto-import
@@ -144,16 +144,7 @@ import { ElMessage } from 'element-plus'
 
 ## Starter Template
 
-### Vue CLI
-
-We prepared a plugin [Element Plus VueCLI plugin](https://github.com/element-plus/vue-cli-plugin-element-plus).
-For [vue-cli](https://cli.vuejs.org/), you can setup a project based
-on Element Plus easily.
-
-### Using Starter Kit
-
-We provide a general [Project Template](https://github.com/element-plus/element-plus-starter),
-also a [Vite Template](https://github.com/element-plus/element-plus-vite-starter).
+We provide a [Vite Template](https://github.com/element-plus/element-plus-vite-starter).
 For Laravel users we have a [Laravel Template](https://github.com/element-plus/element-plus-in-laravel-starter).
 
 ## Global Configuration
@@ -175,16 +166,29 @@ app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 
 On-demand:
 
-```ts
-import { createApp } from 'vue'
-import { ElButton } from 'element-plus'
-import App from './App.vue'
+```vue
+<template>
+  <el-config-provider :size="size" :zIndex="zIndex">
+    <app />
+  </el-config-provider>
+</template>
 
-const app = createApp(App)
-app.config.globalProperties.$ELEMENT = {
-  // options
-}
-app.use(ElButton)
+<script>
+import { defineComponent } from 'vue'
+import { ElConfigProvider } from 'element-plus'
+
+export default defineComponent({
+  components: {
+    ElConfigProvider,
+  },
+  setup() {
+    return {
+      zIndex: 3000,
+      size: 'small',
+    }
+  },
+})
+</script>
 ```
 
 ## Using Nuxt.js
@@ -197,5 +201,5 @@ We can also use [Nuxt.js](https://nuxtjs.org)：
 
 ## Let's Get Started
 
-You can bootstrap your project from now on, for each components usage, please
-refer to individual component documentation.
+You can bootstrap your project from now on. For each components usage, please
+refer to the individual component documentation.

@@ -1,4 +1,3 @@
-import { isValidWidthUnit } from '@element-plus/utils/validators'
 import { buildProps, definePropType } from '@element-plus/utils/props'
 import { UPDATE_MODEL_EVENT } from '@element-plus/utils/constants'
 
@@ -40,6 +39,10 @@ export const dialogProps = buildProps({
     type: Boolean,
     default: false,
   },
+  draggable: {
+    type: Boolean,
+    default: false,
+  },
   lockScroll: {
     type: Boolean,
     default: true,
@@ -74,7 +77,6 @@ export const dialogProps = buildProps({
   modalClass: String,
   width: {
     type: [String, Number],
-    validator: isValidWidthUnit,
   },
   zIndex: {
     type: Number,
